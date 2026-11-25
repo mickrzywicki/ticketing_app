@@ -15,3 +15,8 @@ class User(AbstractUser):
         ADMIN = "admin", "Admin"
 
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.CUSTOMER)
+
+    @property  # Rails: def staff_member? ... end  (called without parentheses)
+    def is_support_staff(self) -> bool:
+        """Agents and admins can see and handle every ticket."""
+        return self.role in {self.Role.AGENT, self.Role.ADMIN}
