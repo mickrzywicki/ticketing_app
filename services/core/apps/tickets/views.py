@@ -1,11 +1,13 @@
 from django.db.models import QuerySet
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 
 from apps.accounts.models import User
 
 from .models import Ticket
-from .serializers import TicketSerializer
+from .serializers import CommentSerializer, TicketSerializer
 
 
 class TicketViewSet(viewsets.ModelViewSet):
@@ -41,3 +43,15 @@ class TicketViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer: BaseSerializer[Ticket]) -> None:
         # Rails: current_user.created_tickets.create!(ticket_params)
         serializer.save(created_by=self.current_user)
+
+    @action(detail=True, methods=["get", "post"])
+    def comments(self, request, pk=None):
+        ticket = self.get_object()
+        if request.method == "GET":
+            serializer = CommentSerializer(ticket.comments.all(), many=True)
+            return Response(serializer.data)
+        if request.method == "POST":
+            serializer = CommentSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(ticket=ticket, author=self.current_user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)

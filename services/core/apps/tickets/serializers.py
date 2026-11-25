@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.accounts.models import User
 
-from .models import Ticket
+from .models import Comment, Ticket
 
 
 class TicketSerializer(serializers.ModelSerializer):
@@ -29,3 +29,17 @@ class TicketSerializer(serializers.ModelSerializer):
         # Client can't send these; they are set by the server.
         # Rails: they are simply left out of params.permit(...)
         read_only_fields = ["id", "created_by", "created_at", "updated_at"]
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author: serializers.StringRelatedField[User] = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "author",
+            "body",
+            "created_at",
+        ]
+        read_only_fields = ["id", "author", "created_at"]
