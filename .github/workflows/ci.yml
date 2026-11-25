@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/core
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: helpdesk
+          POSTGRES_PASSWORD: helpdesk
+          POSTGRES_DB: helpdesk
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U helpdesk"
+          --health-interval 5s
+          --health-retries 10
+    env:
+      SECRET_KEY: ci-secret
+      DATABASE_URL: postgres://helpdesk:helpdesk@localhost:5432/helpdesk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - name: Lint
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Type check
+        run: uv run mypy .
+      - name: Migrations are up to date
+        run: uv run python manage.py makemigrations --check --dry-run
+      - name: Tests
+        run: uv run pytest

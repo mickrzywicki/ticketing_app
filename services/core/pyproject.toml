@@ -1,0 +1,47 @@
+[project]
+name = "helpdesk-core"
+version = "0.1.0"
+description = "Helpdesk core service (Django + DRF)"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=6.1.3",
+    "django-environ>=0.14.0",
+    "django-filter>=26.2",
+    "djangorestframework>=3.18.3",
+    "djangorestframework-simplejwt>=5.5.1",
+    "drf-spectacular>=0.30.0",
+    "psycopg[binary]>=3.3.9",
+]
+
+[dependency-groups]
+dev = [
+    "django-stubs>=6.1.2",
+    "djangorestframework-stubs>=3.18.2",
+    "factory-boy>=3.3.3",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "pytest-django>=4.14.0",
+    "ruff>=0.17.6",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = ["**/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ", "SIM"]
+
+[tool.mypy]
+python_version = "3.13"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings"
