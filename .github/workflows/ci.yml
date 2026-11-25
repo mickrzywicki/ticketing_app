@@ -24,7 +24,7 @@ jobs:
           --health-interval 5s
           --health-retries 10
     env:
-      SECRET_KEY: ci-secret
+      SECRET_KEY: ci-only-insecure-secret-key-0123456789abcdef
       DATABASE_URL: postgres://helpdesk:helpdesk@localhost:5432/helpdesk
     steps:
       - uses: actions/checkout@v4
