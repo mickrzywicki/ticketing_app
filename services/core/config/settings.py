@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     # local
     "apps.accounts",
+    "apps.tickets",
 ]
 
 MIDDLEWARE = [
