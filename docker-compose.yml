@@ -22,8 +22,10 @@ services:
   core:
     build: ./services/core
     env_file: ./services/core/.env.example
-    environment:
+    environment: &core-env
       DATABASE_URL: postgres://helpdesk:helpdesk@db:5432/helpdesk
+      REDIS_URL: redis://redis:6379/0
+      NOTIFIER_URL: http://notifier:5000
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
@@ -33,6 +35,26 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  # Celery worker: same image and code as core, different command (like a Sidekiq process).
+  worker:
+    build: ./services/core
+    env_file: ./services/core/.env.example
+    environment: *core-env
+    command: celery -A config worker -l info
+    volumes:
+      - ./services/core:/app
+      - /app/.venv
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  notifier:
+    build: ./services/notifier
+    ports:
+      - "5001:5000"
 
 volumes:
   pgdata:

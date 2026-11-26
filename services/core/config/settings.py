@@ -114,3 +114,11 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Ticketing service: users, tickets, comments.",
     "VERSION": "0.1.0",
 }
+
+# Celery (background jobs) — Redis as the broker, like Sidekiq.
+CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
+CELERY_TASK_ACKS_LATE = True  # re-run a task if the worker dies mid-way
+CELERY_TASK_TIME_LIMIT = 30
+
+# Notifier microservice (Flask) base URL.
+NOTIFIER_URL = env("NOTIFIER_URL", default="http://localhost:5001")

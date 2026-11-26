@@ -38,3 +38,19 @@ jobs:
         run: uv run python manage.py makemigrations --check --dry-run
       - name: Tests
         run: uv run pytest
+
+  notifier:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/notifier
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - name: Lint
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Type check
+        run: uv run mypy .
+      - name: Tests
+        run: uv run pytest
