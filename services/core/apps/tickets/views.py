@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import QuerySet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -8,6 +9,7 @@ from apps.accounts.models import User
 
 from .models import Ticket
 from .serializers import CommentSerializer, TicketSerializer
+from .tasks import notify_comment_created
 
 
 class TicketViewSet(viewsets.ModelViewSet):
@@ -44,14 +46,17 @@ class TicketViewSet(viewsets.ModelViewSet):
         # Rails: current_user.created_tickets.create!(ticket_params)
         serializer.save(created_by=self.current_user)
 
-    @action(detail=True, methods=["get", "post"])
+    @action(detail=True, methods=["get", "post"], serializer_class=CommentSerializer)
     def comments(self, request, pk=None):
+        """List comments of a ticket (GET) or add a new one (POST)."""
+
         ticket = self.get_object()
         if request.method == "GET":
-            serializer = CommentSerializer(ticket.comments.all(), many=True)
+            serializer = self.get_serializer(ticket.comments.all(), many=True)
             return Response(serializer.data)
         if request.method == "POST":
-            serializer = CommentSerializer(data=request.data)
+            serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save(ticket=ticket, author=self.current_user)
+            comment = serializer.save(ticket=ticket, author=self.current_user)
+            transaction.on_commit(lambda: notify_comment_created.delay(comment.id))
             return Response(serializer.data, status=status.HTTP_201_CREATED)

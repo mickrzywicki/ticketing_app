@@ -14,6 +14,10 @@ def create_app(config: dict | None = None) -> Flask:
     if config:
         app.config.update(config)
 
+    # Without an explicit level, app.logger inherits WARNING under Gunicorn and
+    # logger.info(...) calls are silently dropped. NOTIFIER_LOG_LEVEL overrides it.
+    app.logger.setLevel(app.config.get("LOG_LEVEL", "INFO"))
+
     # Blueprints group routes, a bit like a Rails controller + its routes.
     from .routes import bp
 
