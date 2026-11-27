@@ -17,10 +17,31 @@ core (Django API) ──► Redis ──► worker (Celery) ──HTTP──► 
 
 ## Local development
 
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) (Docker Desktop or OrbStack)
+- Python 3.13 and [uv](https://docs.astral.sh/uv/). With [mise](https://mise.jdx.dev),
+  both are pinned in `mise.toml`:
+
+  ```bash
+  mise trust && mise install
+  ```
+
+### First-time setup
+
+```bash
+cp services/core/.env.example services/core/.env
+(cd services/core && uv sync)
+(cd services/notifier && uv sync)
+```
+
+### Running
+
 Run everything in containers:
 
 ```bash
 docker compose up --build
+docker compose exec core python manage.py createsuperuser   # once, in a second terminal
 ```
 
 Or run services on the host, with only Postgres and Redis in Docker:
@@ -30,8 +51,6 @@ docker compose up -d db redis          # Postgres on localhost:5433, Redis on 63
 
 # core API
 cd services/core
-cp .env.example .env
-uv sync
 uv run python manage.py migrate
 uv run python manage.py createsuperuser
 uv run python manage.py runserver
@@ -41,7 +60,6 @@ uv run celery -A config worker -l info
 
 # notifier (third terminal)
 cd services/notifier
-uv sync
 uv run flask --app notifier run --port 5001
 ```
 

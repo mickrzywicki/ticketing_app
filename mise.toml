@@ -1,0 +1,5 @@
+# Tool versions for local development (https://mise.jdx.dev).
+# mise installs Python and uv; uv then manages each service's .venv from its uv.lock.
+[tools]
+python = "3.13"
+uv = "latest"
