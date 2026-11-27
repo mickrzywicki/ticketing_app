@@ -12,7 +12,7 @@ from .models import Comment
 )
 def notify_comment_created(comment_id: int) -> None:
     """Send a "comment.created" event to the notifier service."""
-    
+
     try:
         comment = Comment.objects.select_related(
             "author", "ticket__created_by", "ticket__assignee"
