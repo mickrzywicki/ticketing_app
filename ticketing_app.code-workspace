@@ -1,0 +1,16 @@
+{
+  // Multi-root workspace: each service gets its own Python interpreter (.venv).
+  "folders": [
+    { "name": "root", "path": "." },
+    { "name": "core (Django)", "path": "services/core" },
+    { "name": "notifier (Flask)", "path": "services/notifier" }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/.pytest_cache": true,
+      "**/.mypy_cache": true,
+      "**/.ruff_cache": true
+    }
+  }
+}
